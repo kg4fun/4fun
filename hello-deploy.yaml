@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloweb
+  labels:
+    app: hello
+spec:
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: hello-app
+        image: us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0 
+        ports:
+        - containerPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: helloweb
+  labels:
+    app: hello
+spec:
+  defaultBackend:
+    service:
+      name: helloweb-backend
+      port:
+        number: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloweb-backend
+  labels:
+    app: hello
+spec:
+  selector:
+    app: hello
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloweb
+  labels:
+    app: hello
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30001
+  selector:
+    app: hello
